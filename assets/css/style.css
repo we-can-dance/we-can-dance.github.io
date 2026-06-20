@@ -244,3 +244,59 @@ audio { display: none; }
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading { text-align: center; padding: 40px; color: var(--muted); }
+
+/* ── Hamburger ── */
+#hamburger {
+  display: none; background: none; border: none; color: var(--text);
+  width: 36px; height: 36px; align-items: center; justify-content: center;
+  border-radius: 7px; cursor: pointer; flex-shrink: 0;
+}
+#hamburger:hover { background: var(--surface2); }
+#sidebar-overlay {
+  display: none; position: fixed; inset: 0; background: #00000077; z-index: 150;
+}
+#sidebar-overlay.open { display: block; }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  :root { --sidebar-w: 260px; --player-h: 64px; }
+
+  /* Header */
+  #hamburger { display: flex; }
+  .app-header .user-info { display: none; }
+  .app-header #logout-btn { display: none; }
+
+  /* Sidebar slides in */
+  .sidebar {
+    position: fixed; top: 0; left: calc(-1 * var(--sidebar-w));
+    height: 100vh; z-index: 200;
+    transition: left .25s ease; box-shadow: 4px 0 24px #00000055;
+  }
+  .sidebar.open { left: 0; }
+
+  /* Main takes full width */
+  .app-body { flex-direction: column; }
+  .main-content { padding: 16px; padding-bottom: calc(var(--player-h) + 16px); }
+
+  /* Grids → single column */
+  .song-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+
+  /* Detail header stacks */
+  .detail-header { flex-wrap: wrap; }
+  .detail-header > div:last-child { width: 100%; }
+
+  /* Player compact */
+  #player { padding: 0 12px; gap: 10px; }
+  .player-info { min-width: 0; flex: 1; }
+  .volume-wrap { display: none; }
+  .speed-select { display: none; }
+
+  /* Admin tabs scroll */
+  .admin-tabs { width: 100%; overflow-x: auto; }
+  .inline-form { flex-direction: column; }
+
+  /* Song detail buttons */
+  .detail-header > div[style*="margin-left:auto"] { margin-left: 0 !important; flex-wrap: wrap; }
+}

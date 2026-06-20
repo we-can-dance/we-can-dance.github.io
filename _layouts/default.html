@@ -32,11 +32,17 @@
 
   <!-- Header -->
   <header class="app-header">
+    <button id="hamburger" aria-label="Menu">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
     <div class="logo">💃 Dance Library</div>
     <span id="header-name" class="user-info"></span>
     <span id="header-role" class="role-badge"></span>
     <button class="btn btn-ghost btn-sm" id="logout-btn">Sign Out</button>
   </header>
+  <div id="sidebar-overlay"></div>
 
   <div class="app-body">
 

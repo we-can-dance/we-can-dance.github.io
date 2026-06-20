@@ -117,6 +117,20 @@ function fetchProfileBackground() {
   });
 }
 
+// ── Mobile sidebar toggle ──
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+});
+document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', closeSidebar);
+});
+
 function updateProfileUI(data) {
   document.getElementById('header-name').textContent = data?.full_name || data?.email || '';
   const badge = document.getElementById('header-role');
