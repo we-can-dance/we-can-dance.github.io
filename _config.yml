@@ -1,0 +1,19 @@
+title: Dance Library
+description: Private song library for dance classes
+url: "https://wecandance.github.io"
+baseurl: ""
+
+# Jekyll settings
+markdown: kramdown
+permalink: pretty
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - supabase-setup.sql
+  - node_modules
+  - README.md
+
+# No theme — fully custom design
+theme: null
