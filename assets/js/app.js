@@ -474,6 +474,17 @@ async function openSong(id) {
           </select>
           <p style="font-size:11px;color:var(--muted);margin-top:4px">Hold Ctrl/Cmd to select multiple</p>
         </div>
+        <div class="form-group full">
+          <label>Audio File</label>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="font-size:12px;color:var(--muted)">${song.audio_path ? '✓ Audio uploaded' : 'No audio'}</span>
+            <input type="file" id="edit-audio" accept="audio/*" style="flex:1;min-width:180px" />
+            ${song.audio_path ? `<button class="btn btn-danger btn-sm" id="delete-audio-btn" type="button">✕ Delete Audio</button>` : ''}
+          </div>
+          <div class="upload-progress" id="edit-audio-progress">
+            <div class="upload-progress-bar" id="edit-audio-progress-bar" style="width:0%"></div>
+          </div>
+        </div>
       </div>
       <div style="margin-top:12px;display:flex;gap:8px">
         <button class="btn btn-primary" id="save-edit-btn">Save Changes</button>
@@ -493,6 +504,16 @@ async function openSong(id) {
       document.getElementById('edit-form-section').style.display = 'none';
     });
     document.getElementById('save-edit-btn').addEventListener('click', () => saveSongEdit(song));
+    if (song.audio_path) {
+      document.getElementById('delete-audio-btn').addEventListener('click', async () => {
+        if (!confirm('Delete the audio file? This cannot be undone.')) return;
+        await sb.storage.from('audio').remove([song.audio_path]);
+        await sb.from('songs').update({ audio_path: null }).eq('id', song.id);
+        toast('Audio deleted');
+        await loadSongs();
+        openSong(song.id);
+      });
+    }
   }
 }
 
@@ -503,6 +524,20 @@ async function saveSongEdit(song) {
   const btn = document.getElementById('save-edit-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
 
+  // Handle audio re-upload
+  let newAudioPath = song.audio_path;
+  const audioFile = document.getElementById('edit-audio').files[0];
+  if (audioFile) {
+    btn.textContent = 'Uploading audio…';
+    if (song.audio_path) await sb.storage.from('audio').remove([song.audio_path]);
+    newAudioPath = `${Date.now()}_${sanitize(audioFile.name)}`;
+    document.getElementById('edit-audio-progress').style.display = 'block';
+    document.getElementById('edit-audio-progress-bar').style.width = '40%';
+    const { error: uploadErr } = await sb.storage.from('audio').upload(newAudioPath, audioFile);
+    if (uploadErr) { toast('Audio upload failed: ' + uploadErr.message, 'error'); btn.disabled = false; btn.textContent = 'Save Changes'; return; }
+    document.getElementById('edit-audio-progress-bar').style.width = '100%';
+  }
+
   const { error } = await sb.from('songs').update({
     title,
     artist:      document.getElementById('edit-artist').value.trim()  || null,
@@ -512,6 +547,7 @@ async function saveSongEdit(song) {
     writer:      document.getElementById('edit-writer').value.trim()  || null,
     description: document.getElementById('edit-notes').value.trim()  || null,
     youtube_url: document.getElementById('edit-youtube').value.trim() || null,
+    audio_path:  newAudioPath,
   }).eq('id', song.id);
 
   if (error) { toast('Error saving: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Save Changes'; return; }
