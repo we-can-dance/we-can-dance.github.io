@@ -355,6 +355,7 @@ async function openSong(id) {
         ${song.audio_path ? `<button class="btn btn-primary" onclick="playSong('${song.id}')">▶ Play</button>` : ''}
         ${audioUrl ? `<button class="btn btn-ghost" onclick="downloadFile('${audioUrl}', '${song.title.replace(/[^a-z0-9]/gi,'_')}.mp3')">↓ Download</button>` : ''}
         ${ (currentProfile?.role === 'admin' || currentProfile?.role === 'superuser') ? `<button class="btn btn-ghost" id="edit-song-btn">✎ Edit</button>` : '' }
+        ${ currentProfile?.role === 'admin' ? `<button class="btn btn-danger btn-sm" id="delete-song-btn">✕ Delete</button>` : '' }
       </div>
     </div>
 
@@ -504,6 +505,9 @@ async function openSong(id) {
       document.getElementById('edit-form-section').style.display = 'none';
     });
     document.getElementById('save-edit-btn').addEventListener('click', () => saveSongEdit(song));
+    if (currentProfile?.role === 'admin') {
+      document.getElementById('delete-song-btn').addEventListener('click', () => deleteSong(song));
+    }
     if (song.audio_path) {
       document.getElementById('delete-audio-btn').addEventListener('click', async () => {
         if (!confirm('Delete the audio file? This cannot be undone.')) return;
@@ -515,6 +519,19 @@ async function openSong(id) {
       });
     }
   }
+}
+
+async function deleteSong(song) {
+  if (!confirm(`Delete "${song.title}"? This cannot be undone.`)) return;
+  // Delete storage files
+  if (song.audio_path) await sb.storage.from('audio').remove([song.audio_path]);
+  if (song.pdf_path)   await sb.storage.from('pdfs').remove([song.pdf_path]);
+  // Delete DB record (cascades to song_classes, user_notes, individual_song_access)
+  const { error } = await sb.from('songs').delete().eq('id', song.id);
+  if (error) { toast('Error deleting: ' + error.message, 'error'); return; }
+  toast('Song deleted');
+  await loadSongs();
+  showSection('library');
 }
 
 async function saveSongEdit(song) {
@@ -725,13 +742,13 @@ document.getElementById('upload-btn').addEventListener('click', async () => {
 // ══════════════════════════════════════════
 // ADMIN
 // ══════════════════════════════════════════
-document.querySelectorAll('.admin-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-  });
+document.getElementById('section-admin').addEventListener('click', e => {
+  const tab = e.target.closest('.admin-tab');
+  if (!tab) return;
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
 });
 
 async function loadAdminData() {
