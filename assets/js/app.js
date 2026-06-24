@@ -307,6 +307,7 @@ function renderLibrary() {
           ${s.dance_style ? `<span class="tag style">${s.dance_style}</span>` : ''}
           ${s.ragam      ? `<span class="tag">${s.ragam}</span>`               : ''}
           ${s.talam      ? `<span class="tag">${s.talam}</span>`               : ''}
+          ${s.video_url  ? `<span class="tag video">🎬 Video</span>`           : ''}
           ${classNames}
         </div>
       </div>`;

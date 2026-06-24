@@ -134,6 +134,7 @@ label { display: block; margin-bottom: 4px; color: var(--muted); font-size: 12px
 .song-meta-tags { display: flex; gap: 5px; flex-wrap: wrap; }
 .tag { font-size: 11px; padding: 2px 7px; border-radius: 20px; background: var(--surface2); color: var(--muted); }
 .tag.style { background: #c8871f18; color: var(--accent); }
+.tag.video { background: #4caf7d18; color: var(--success); font-weight: 600; }
 .play-btn-card {
   position: absolute; top: 12px; right: 12px;
   background: var(--accent); color: #fff; border: none; border-radius: 50%;
