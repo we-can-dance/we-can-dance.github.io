@@ -34,6 +34,23 @@ function fmt(secs) {
   return m + ':' + String(s).padStart(2, '0');
 }
 
+function getYouTubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function getEmbedUrl(url) {
+  if (!url) return null;
+  // YouTube
+  const ytId = getYouTubeId(url);
+  if (ytId) return `https://www.youtube.com/embed/${ytId}`;
+  // Google Drive
+  const driveM = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (driveM) return `https://drive.google.com/file/d/${driveM[1]}/preview`;
+  return null;
+}
+
 function sanitize(str) {
   if (!str) return '';
   return String(str).replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -415,6 +432,19 @@ async function openSong(id) {
       </div>
     </div>
 
+    ${getEmbedUrl(song.video_url) ? `
+    <div class="detail-section">
+      <div class="detail-section-title">Video</div>
+      <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;border:1px solid var(--border)">
+        <iframe
+          src="${getEmbedUrl(song.video_url)}"
+          style="position:absolute;top:0;left:0;width:100%;height:100%;border:0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>` : ''}
+
     <div class="detail-section">
       <div class="detail-section-title">
         My Notes
@@ -464,6 +494,10 @@ async function openSong(id) {
         <div class="form-group full">
           <label>YouTube Link</label>
           <input type="url" id="edit-youtube" value="${song.youtube_url || ''}" />
+        </div>
+        <div class="form-group full">
+          <label>Embed Video (YouTube or Google Drive)</label>
+          <input type="url" id="edit-video" value="${song.video_url || ''}" placeholder="https://youtube.com/watch?v=… or https://drive.google.com/file/d/…" />
         </div>
         <div class="form-group full">
           <label>Classes</label>
@@ -564,6 +598,7 @@ async function saveSongEdit(song) {
     writer:      document.getElementById('edit-writer').value.trim()  || null,
     description: document.getElementById('edit-notes').value.trim()  || null,
     youtube_url: document.getElementById('edit-youtube').value.trim() || null,
+    video_url:   document.getElementById('edit-video').value.trim()   || null,
     audio_path:  newAudioPath,
   }).eq('id', song.id);
 
@@ -704,6 +739,7 @@ document.getElementById('upload-btn').addEventListener('click', async () => {
       writer:      document.getElementById('up-writer').value.trim()  || null,
       description: document.getElementById('up-notes').value.trim()  || null,
       youtube_url: document.getElementById('up-youtube').value.trim() || null,
+      video_url:   document.getElementById('up-video').value.trim()   || null,
       audio_path:  audioPath,
       pdf_path:    pdfPath,
       uploaded_by: currentUser.id
@@ -718,7 +754,7 @@ document.getElementById('upload-btn').addEventListener('click', async () => {
       );
     }
 
-    ['up-title','up-artist','up-style','up-ragam','up-talam','up-writer','up-notes','up-youtube'].forEach(id => {
+    ['up-title','up-artist','up-style','up-ragam','up-talam','up-writer','up-notes','up-youtube','up-video'].forEach(id => {
       document.getElementById(id).value = '';
     });
     document.getElementById('up-audio').value = '';
